@@ -1,0 +1,89 @@
+import TableData from "./TableData"; // Ensure this import is correct
+
+const Dashboard = () => {
+  const [data, setData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    topics: "",
+    trainerName: "", // Add this field to capture Trainer Name
+  });
+
+  const [showModal, setShowModal] = useState(false);
+  const handleShow = () => setShowModal(true);
+  const handleClose = () => setShowModal(false);
+
+  // Function to refresh table data
+  const refreshTableData = () => {
+    // Logic to trigger refresh of TableData, either via state or ref
+    // You may need to adjust this based on how you pass props to TableData
+  };
+
+  const onChangeHandle = (e) => {
+    const { name, value } = e.target;
+    setData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const addDataHandle = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(URLs.AXIOS_SUB_GET_POST, data);
+      localStorage.setItem("token", response.data?.token);
+      toast.success("User added successfully!");
+      refreshTableData(); // Refresh table after adding user
+      handleClose(); // Close the modal after submission
+    } catch (error) {
+      console.error("Error Adding Data", error);
+      toast.error("Error adding user data");
+    }
+  };
+
+  return (
+    <>
+      <ToastContainer />
+      <div className="d-flex justify-content-between">
+        <h2>User Dashboard</h2>
+        <Button variant="primary" onClick={handleShow}>
+          Add User
+        </Button>
+      </div>
+
+      {/* Modal for Add User Form */}
+      <Modal show={showModal} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add New User</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={addDataHandle}>
+            {/* Form Fields */}
+            <Form.Group className="mb-3" controlId="formFirstName">
+              <Form.Label>Training Name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter Training Name"
+                name="firstName" // Ensure this matches your backend
+                value={data.firstName}
+                onChange={onChangeHandle}
+                required
+              />
+            </Form.Group>
+            {/* Add other fields as necessary */}
+            <Button variant="primary" type="submit">
+              Add User
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
+      {/* Table showing data */}
+      <div>
+        <TableData refresh={refreshTableData} /> {/* Pass refresh as a prop */}
+      </div>
+    </>
+  );
+};
+
+export default Dashboard;
